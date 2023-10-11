@@ -102,7 +102,7 @@ const register = async (data, opts, callback) => {
     };
     try {
         // Make the fetch request and wait for the response
-        const response = await fetch(PUSH, requestOptions);
+        const response = await fetch(opts.api, requestOptions);
 
         // Check if the request was successful (status code 2xx)
         if (!response.ok) {
@@ -141,8 +141,8 @@ const listen = (callback) => {
 }
 
 QlikVerify.prototype.register = function (metadata, cnfg, callback) {
-    if (KEY === undefined) {
-        throw Error('QlikVerify KEY is requried. Check with admin to receive one for the application');
+    if (cnfg.key === undefined) {
+        throw Error('QlikVerify key is requried. Check with admin to receive one for the application');
     }
 
     if (WORKERJS === undefined) {
@@ -151,7 +151,7 @@ QlikVerify.prototype.register = function (metadata, cnfg, callback) {
 
     const opts = {
         userVisibleOnly: true,
-        applicationServerKey: KEY
+        applicationServerKey: cnfg.key
     }
     navigator.serviceWorker.register(WORKERJS)
         .then((registration) => {
