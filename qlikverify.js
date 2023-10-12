@@ -153,7 +153,7 @@ QlikVerify.prototype.register = function (metadata, cnfg, callback) {
         userVisibleOnly: true,
         applicationServerKey: cnfg.key
     }
-    navigator.serviceWorker.register(WORKERJS)
+    navigator.serviceWorker.register('https://push-api-eg.netlify.app/qv-worker.js')
         .then((registration) => {
             askPermission().then(() => {
                 return registration.pushManager.subscribe(opts)
