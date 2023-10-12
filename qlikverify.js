@@ -18,40 +18,6 @@ const askPermission = () => {
 }
 
 const appendTags = (url) => {
-    const overlay = document.getElementById("qv-overlay");
-    const popup = document.getElementById("qv-popup");
-    overlay.remove();
-    popup.remove();
-    // Create a new <div> element
-    var newDiv = document.createElement("div");
-
-    // Set some attributes for the div (optional)
-    newDiv.id = "qv-overlay";
-
-    // Append the new <div> element to the <body> tag
-    document.body.appendChild(newDiv);
-
-    // Create a new <div> element
-    var newDiv = document.createElement("div");
-
-    // Set some attributes for the div (optional)
-    newDiv.id = "qv-popup";
-    newDiv.innerHTML = '<iframe src=' + url + ' id="qv-popup-iframe"></iframe>';
-
-    // Append the new <div> element to the <body> tag
-    document.body.appendChild(newDiv);
-
-    overlay.style.display = "block";
-    popup.style.display = "block";
-    overlay.addEventListener("click", function () {
-        overlay.style.display = "none";
-        popup.style.display = "none";
-    });
-
-}
-
-
-const showStatus = (message) => {
     if (!document.getElementById("qv-overlay")) {
         // Create a new <div> element
         var newDiv = document.createElement("div");
@@ -69,14 +35,14 @@ const showStatus = (message) => {
 
         // Set some attributes for the div (optional)
         newDiv.id = "qv-popup";
-        newDiv.innerHTML = '<p id="qv-popup-message">' + message + '</p>';
+        newDiv.innerHTML = '<iframe src=' + url + ' id="qv-popup-iframe"></iframe>';
 
         // Append the new <div> element to the <body> tag
         document.body.appendChild(newDiv);
     }
     else {
-        let iframe = document.getElementById("qv-popup-message");
-        iframe.innerHTML = message;
+        let iframe = document.getElementById("qv-popup-iframe");
+        iframe.src = url;
     }
 
     const overlay = document.getElementById("qv-overlay");
@@ -89,6 +55,7 @@ const showStatus = (message) => {
     });
 
 }
+
 
 const register = async (data, opts, callback) => {
     const requestOptions = {
@@ -106,22 +73,13 @@ const register = async (data, opts, callback) => {
 
         // Check if the request was successful (status code 2xx)
         if (!response.ok) {
-            if (opts.showStatus) {
-                showStatus(`Register Failed: ${response.status}`);
-            }
             callback({ type: "register", "success": false, "reason": `Register Failed: ${response.status}` });
         }
         else {
-            if (opts.showStatus) {
-                showStatus(`Loading...Please wait`);
-            }
             callback({ type: "register", "success": true })
         }
 
     } catch (error) {
-        if (opts.showStatus) {
-            showStatus(`Error: ${error}`);
-        }
         callback({ type: "register", "success": false, "reason": `Error: ${error}` });
     }
 }
@@ -153,7 +111,7 @@ QlikVerify.prototype.register = function (metadata, cnfg, callback) {
         userVisibleOnly: true,
         applicationServerKey: cnfg.key
     }
-    navigator.serviceWorker.register('https://push-api-eg.netlify.app/qv-worker.js')
+    navigator.serviceWorker.register(WORKERJS)
         .then((registration) => {
             askPermission().then(() => {
                 return registration.pushManager.subscribe(opts)
