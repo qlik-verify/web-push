@@ -1,22 +1,6 @@
 function QlikVerify() {
 }
 
-const askPermission = () => {
-    return new Promise((resolve, reject) => {
-        const permissionResult = Notification.requestPermission((result) => {
-            resolve(result)
-        })
-        if (permissionResult) {
-            permissionResult.then(resolve, reject)
-        }
-    })
-        .then((permissionResult) => {
-            if (permissionResult !== 'granted') {
-                throw new Error('Permission denied')
-            }
-        })
-}
-
 const appendTags = (url) => {
     if (!document.getElementById("qv-overlay")) {
         // Create a new <div> element
@@ -57,7 +41,7 @@ const appendTags = (url) => {
 }
 
 
-const register = async (data, opts, callback) => {
+const request = async (data, opts, callback) => {
     const requestOptions = {
         method: 'POST',
         headers: {
@@ -76,7 +60,13 @@ const register = async (data, opts, callback) => {
             callback({ type: "register", "success": false, "reason": `Register Failed: ${response.status}` });
         }
         else {
-            callback({ type: "register", "success": true })
+            let res = JSON.parse(response.body);
+            if(res.listen)
+            {
+                listen(res.trxId,res.pollUrl,callback);
+            }
+            appendTags(res.url);
+            //callback({ type: "register", "success": true })
         }
 
     } catch (error) {
@@ -84,49 +74,27 @@ const register = async (data, opts, callback) => {
     }
 }
 
-const listen = (callback) => {
-    navigator.serviceWorker.onmessage = (event) => {
-        const payload = JSON.parse(event.data.payload);
-        switch (payload.type) {
-            case "trx_init":
-                appendTags(payload.url);
-                break;
-            case "trx_result":
-                callback({ type: "result", "data": payload.result });
-                break;
-        }
-    };
+const listen = (trxId,pollUrl,callback) => {
+
+    let socket = io(pollUrl, { transports: ['websocket'] });
+    socket.auth = {trxId};
+    socket.connect();
+    socket.on(trxId, function (event) {
+        console.log(event);
+        $("#event").append("<p>" + JSON.stringify(event) + "</p>");
+        $("#event").append("<p>--------------------------------------------</p>")
+        callback(event);
+    });
+    socket.on('connect', function () {
+        console.log("Connection established, waiting for messages");
+        $("#status").append("<p>Connection established, waiting for messages</p>");
+        $("#status").append("<p>--------------------------------------------</p>")
+    });
 }
 
 QlikVerify.prototype.register = function (metadata, cnfg, callback) {
-    if (cnfg.key === undefined) {
-        throw Error('QlikVerify key is requried. Check with admin to receive one for the application');
+    var request = {
+        "metadata": metadata
     }
-
-    if (WORKERJS === undefined) {
-        throw Error('QlikVerify WORKERJS file is requried. Check with admin to receive one for the application');
-    }
-
-    const opts = {
-        userVisibleOnly: true,
-        applicationServerKey: cnfg.key
-    }
-    navigator.serviceWorker.register(WORKERJS)
-        .then((registration) => {
-            askPermission().then(() => {
-                return registration.pushManager.subscribe(opts)
-            }).then((pushSubscription) => {
-                var request = {
-                    "subscription": pushSubscription,
-                    "metadata": metadata
-                }
-                listen(callback);
-                register(request, cnfg, callback);
-                //here call the backend to register
-            });
-        }, (err) => {
-            console.log('device registration failed', err)
-        })
-
-
+    register(request, cnfg, callback);
 }
