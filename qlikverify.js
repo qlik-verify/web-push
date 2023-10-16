@@ -13,6 +13,7 @@ const appendTags = (url) => {
         // Append the new <div> element to the <body> tag
         document.body.appendChild(newDiv);
     }
+    var timestamp = new Date().getTime();
 
     if (!document.getElementById("qv-popup")) {
         // Create a new <div> element
@@ -20,14 +21,14 @@ const appendTags = (url) => {
 
         // Set some attributes for the div (optional)
         newDiv.id = "qv-popup";
-        newDiv.innerHTML = '<iframe src=' + url + ' id="qv-popup-iframe"></iframe>';
+        newDiv.innerHTML = '<iframe src=' + url + '?'+timestamp+' id="qv-popup-iframe"></iframe>';
 
         // Append the new <div> element to the <body> tag
         document.body.appendChild(newDiv);
     }
     else {
         let iframe = document.getElementById("qv-popup-iframe");
-        iframe.src = url;
+        iframe.src = url+ '?'+timestamp;
     }
 
     const overlay = document.getElementById("qv-overlay");
