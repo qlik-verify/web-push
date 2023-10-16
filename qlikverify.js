@@ -1,6 +1,7 @@
 function QlikVerify() {
 }
 
+
 const appendTags = (url) => {
     if (!document.getElementById("qv-overlay")) {
         // Create a new <div> element
@@ -60,13 +61,12 @@ const request = async (data, opts, callback) => {
             callback({ type: "register", "success": false, "reason": `Register Failed: ${response.status}` });
         }
         else {
-            let res = JSON.parse(response.body);
+            let res = await response.json();
             if(res.listen)
             {
                 listen(res.trxId,res.pollUrl,callback);
             }
             appendTags(res.url);
-            //callback({ type: "register", "success": true })
         }
 
     } catch (error) {
@@ -92,9 +92,9 @@ const listen = (trxId,pollUrl,callback) => {
     });
 }
 
-QlikVerify.prototype.register = function (metadata, cnfg, callback) {
-    var request = {
+QlikVerify.prototype.request = function (metadata, cnfg, callback) {
+    var trxRequest = {
         "metadata": metadata
     }
-    register(request, cnfg, callback);
+    request(trxRequest, cnfg, callback);
 }
