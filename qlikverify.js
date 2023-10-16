@@ -1,8 +1,28 @@
 function QlikVerify() {
 }
 
+function deleteCookiesForDomain(domain) {
+    var cookies = document.cookie.split("; ");
+
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var cookieName = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        var cookieDomain = location.hostname;
+
+        // Check if the cookie domain matches the specified domain
+        if (cookieDomain === domain || cookieDomain.endsWith("." + domain)) {
+            document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+    }
+}
+
+// Usage example: deleteCookiesForDomain('example.com');
+
+
 
 const appendTags = (url) => {
+    deleteCookiesForDomain("https://dashboard.dev.qlikverify.com");
     if (!document.getElementById("qv-overlay")) {
         // Create a new <div> element
         var newDiv = document.createElement("div");
