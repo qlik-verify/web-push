@@ -1,19 +1,19 @@
 function QlikVerify() {
 }
 
-function deleteCookiesForDomain(domain) {
-    var cookies = document.cookie.split("; ");
+function removeIframeCookies() {
+    // Access the iframe element
+    var iframe = document.getElementById('qv-popup-iframe'); // Replace with your iframe's actual ID
 
-    for (var i = 0; i < cookies.length; i++) {
-        var cookie = cookies[i];
-        var eqPos = cookie.indexOf("=");
-        var cookieName = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-        var cookieDomain = location.hostname;
+    // Access the iframe's document and its cookies
+    var iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+    var iframeCookies = iframeDocument.cookie.split('; ');
 
-        // Check if the cookie domain matches the specified domain
-        if (cookieDomain === domain || cookieDomain.endsWith("." + domain)) {
-            document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        }
+    // Iterate through the iframe's cookies and delete them
+    for (var i = 0; i < iframeCookies.length; i++) {
+        var cookie = iframeCookies[i].split('=');
+        var cookieName = cookie[0];
+        document.cookie = cookieName + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     }
 }
 
@@ -22,7 +22,7 @@ function deleteCookiesForDomain(domain) {
 
 
 const appendTags = (url) => {
-    deleteCookiesForDomain("https://dashboard.dev.qlikverify.com");
+    removeIframeCookies();
     if (!document.getElementById("qv-overlay")) {
         // Create a new <div> element
         var newDiv = document.createElement("div");
