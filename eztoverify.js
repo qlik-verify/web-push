@@ -154,6 +154,7 @@ const showLoader = (opts) => {
 };
 
 const showModal = (url, opts, callback) => {
+  hideStatus();
   if (!document.getElementById("ez-modal")) {
     appendIframeModal(url, opts, callback);
   } else {
@@ -168,7 +169,6 @@ const showModal = (url, opts, callback) => {
     document.getElementById("frameLoader").style.display = "none";
     document.getElementById("ez-iframe").style.display = "block";
     document.getElementById("ez-modal").style.display = "flex";
-    hideStatus();
   };
 };
 
